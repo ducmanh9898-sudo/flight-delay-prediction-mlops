@@ -20,10 +20,23 @@ pipeline {
         }
 
         stage('Test') {
+            environment {
+                OTEL_SDK_DISABLED = 'true'
+            }
+
             steps {
                 sh '''
                     . .venv/bin/activate
                     python -m pytest -v
+                '''
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    docker build \
+                      -t flight-delay-api:${BUILD_NUMBER} .
                 '''
             }
         }
