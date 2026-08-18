@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flight-delay-api
+  labels:
+    app: flight-delay-api
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: flight-delay-api
+
+  template:
+    metadata:
+      labels:
+        app: flight-delay-api
+
+    spec:
+      containers:
+        - name: flight-delay-api
+          image: flight-delay-api:v2
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8000
+
+          env:
+            - name: OTEL_SDK_DISABLED
+              value: "true"
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
